@@ -1,0 +1,28 @@
+#!/usr/bin/zsh
+function __qzsh_echo { [[ "${QZSH_SILENT_INSTALL}" = "true" ]] || print -P "%B%F{7}%U${@}%b%f%u"; }
+
+function __qzsh_install() {
+	if [[ ! -d "${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions" ]]; then
+		__qzsh_echo 'Cloning git repository...'
+		git clone https://github.com/zsh-users/zsh-autosuggestions.git "${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions"
+	fi
+
+	if [[ -d "${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions" ]]; then
+		__qzsh_echo 'Adding zsh-autosuggestions to the database...'
+		grep -qe '^zsh-users/zsh-autosuggestions$' "${QZSH_PREFIX:-$HOME/.qzsh}/repository/installed" || echo 'zsh-users/zsh-autosuggestions' >> "${QZSH_PREFIX:-$HOME/.qzsh}/repository/installed"
+	fi
+	__qzsh_echo 'Done!'
+}
+
+function __qzsh_remove() {
+	if [[ -d "${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions" ]]; then
+		echo "Removing '${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions'"
+		rm -rf "${QZSH_PREFIX:-$HOME/.qzsh}/plugins/zsh-autosuggestions"
+	fi
+
+	__qzsh_echo 'Removing zsh-autosuggestions from the database...'
+	sed -i -r '/^(\/usr)?zsh-users\/zsh-autosuggestions$/d' "${QZSH_PREFIX:-$HOME/.qzsh}/repository/installed" && \
+	__qzsh_echo 'Done!'
+}
+
+__qzsh_${1}
